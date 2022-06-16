@@ -1,0 +1,15 @@
+*$FROM expr
+$EXTERN Parse;
+
+$ENTRY Go {
+  /* пусто */
+    = <Test 'n*(n+n)$'>
+      <Test 'n(n+n)$'>
+      <Test 'n*(n+$'>
+      <Test '+(n+n)$'>
+      <Test '$'>
+}
+
+Test {
+  e.Text = <Prout e.Text ': ' <Parse e.Text>>
+}

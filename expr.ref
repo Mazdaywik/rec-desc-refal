@@ -1,0 +1,96 @@
+$ENTRY Parse {
+  e.Tokens = <Parse-Check <E () e.Tokens>>;
+}
+
+Parse-Check {
+  E '$' = Ok;
+
+  s.Unexpected e.Tokens = Unexpected s.Unexpected Expected EOF;
+
+  ERR e.Message = e.Message
+}
+
+E {
+  (e.Scanned) ERR e.Message = ERR e.Message;
+
+  /* E ::= T E1 */
+  () T e.Tokens = <E (T) e.Tokens>;
+  () e.Tokens = <E () <T () e.Tokens>>;
+
+  (T) E1 e.Tokens = <E (T E1) e.Tokens>;
+  (T) e.Tokens = <E (T) <E1 () e.Tokens>>;
+
+  (T E1) e.Tokens = E e.Tokens;
+}
+
+E1 {
+  (e.Scanned) ERR e.Message = ERR e.Message;
+
+  /* E1 ::= '+' T E1 | '-' T E1 */
+  () '+' e.Tokens = <E1 ('+') e.Tokens>;
+  () '-' e.Tokens = <E1 ('-') e.Tokens>;
+
+  (s.Op) T e.Tokens = <E1 (s.Op T) e.Tokens>;
+  (s.Op) e.Tokens = <E1 (s.Op) <T () e.Tokens>>;
+
+  (s.Op T) E1 e.Tokens = <E1 (s.Op T E1) e.Tokens>;
+  (s.Op T) e.Tokens = <E1 (s.Op T) <E1 () e.Tokens>>;
+
+  (s.Op T E1) e.Tokens = E1 e.Tokens;
+
+  /* E1 ::= ε */
+  () e.Tokens = E1 e.Tokens
+}
+
+T {
+  (e.Scanned) ERR e.Message = ERR e.Message;
+
+  /* T ::= F T1 */
+  () F e.Tokens = <T (F) e.Tokens>;
+  () e.Tokens = <T () <F () e.Tokens>>;
+
+  (F) T1 e.Tokens = <T (F T1) e.Tokens>;
+  (F) e.Tokens = <T (F) <T1 () e.Tokens>>;
+
+  (F T1) e.Tokens = T e.Tokens;
+}
+
+T1 {
+  (e.Scanned) ERR e.Message = ERR e.Message;
+
+  /* T1 ::= '*' F T1 | '-' F T1 */
+  () '*' e.Tokens = <T1 ('*') e.Tokens>;
+  () '/' e.Tokens = <T1 ('/') e.Tokens>;
+
+  (s.Op) F e.Tokens = <T1 (s.Op F) e.Tokens>;
+  (s.Op) e.Tokens = <T1 (s.Op) <F () e.Tokens>>;
+
+  (s.Op F) T1 e.Tokens = <T1 (s.Op F T1) e.Tokens>;
+  (s.Op F) e.Tokens = <T1 (s.Op F) <T1 () e.Tokens>>;
+
+  (s.Op F T1) e.Tokens = T1 e.Tokens;
+
+  /* E1 ::= ε */
+  () e.Tokens = T1 e.Tokens
+}
+
+F {
+  (e.Scanned) ERR e.Message = ERR e.Message;
+
+  /* n */
+  () 'n' e.Tokens = <F ('n') e.Tokens>;
+  ('n') e.Tokens = F e.Tokens;
+
+  /* ( E ) */
+  () '(' e.Tokens = <F ('(') e.Tokens>;
+
+  ('(') E e.Tokens = <F ('(' E) e.Tokens>;
+  ('(') e.Tokens = <F ('(') <E () e.Tokens>>;
+
+  ('(' E) ')' e.Tokens = <F ('(' E ')') e.Tokens>;
+
+  ('(' E ')') e.Tokens = F e.Tokens;
+
+  (e.Scanned) s.Unexpected e.Tokens
+    = ERR Unexpected s.Unexpected in F;
+}
