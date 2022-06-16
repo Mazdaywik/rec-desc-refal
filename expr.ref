@@ -77,11 +77,11 @@ T1 {
 F {
   (e.Scanned) ERR e.Message = ERR e.Message;
 
-  /* n */
+  /* F ::= n */
   () 'n' e.Tokens = <F ('n') e.Tokens>;
   ('n') e.Tokens = F e.Tokens;
 
-  /* ( E ) */
+  /* F ::= ( E ) */
   () '(' e.Tokens = <F ('(') e.Tokens>;
 
   ('(') E e.Tokens = <F ('(' E) e.Tokens>;
